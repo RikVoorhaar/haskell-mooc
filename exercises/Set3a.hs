@@ -297,4 +297,13 @@ multiApp f gs x = f [g x | g <- gs]
 -- function, the surprise won't work. See section 3.8 in the material.
 
 interpreter :: [String] -> [String]
-interpreter commands = todo
+interpreter = interpreter' 0 0
+  where
+    interpreter' :: Int -> Int -> [String] -> [String]
+    interpreter' x y ("up" : rest) = interpreter' x (y + 1) rest
+    interpreter' x y ("down" : rest) = interpreter' x (y - 1) rest
+    interpreter' x y ("left" : rest) = interpreter' (x - 1) y rest
+    interpreter' x y ("right" : rest) = interpreter' (x + 1) y rest
+    interpreter' x y ("printX" : rest) = show x : interpreter' x y rest
+    interpreter' x y ("printY" : rest) = show y : interpreter' x y rest
+    interpreter' x y [] = []
