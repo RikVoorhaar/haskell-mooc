@@ -174,7 +174,11 @@ winner scores player1 player2 = if Map.findWithDefault 0 player1 scores >= Map.f
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs = foldr (Map.alter update) Map.empty
+  where
+    update x = case x of
+      Nothing -> Just 1
+      Just x -> Just (x + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -207,7 +211,12 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank =
+  case (Map.lookup from bank, Map.lookup to bank) of
+    (Just fromBalance, Just toBalance)
+      | amount > 0 && fromBalance >= amount ->
+          Map.insert to (toBalance + amount) $ Map.insert from (fromBalance - amount) bank
+    _ -> bank
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -217,7 +226,7 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: (Ix i) => i -> i -> Array i a -> Array i a
-swap i j arr = todo
+swap i j arr = arr // [(j, arr ! i), (i, arr ! j)]
 
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
@@ -228,4 +237,9 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex arr = fst $ foldl1 check (Data.Array.assocs arr)
+  where
+    check :: (Ix i, Ord a) => (i, a) -> (i, a) -> (i, a)
+    check (i, a) (j, b)
+      | a > b = (i, a)
+      | otherwise = (j, b)
